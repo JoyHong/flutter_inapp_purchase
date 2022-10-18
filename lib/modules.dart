@@ -220,6 +220,9 @@ class PurchasedItem {
   final bool? isAcknowledgedAndroid;
   final PurchaseState? purchaseStateAndroid;
 
+  // Amazon only
+  final String? userIdAmazon;
+
   // iOS only
   final DateTime? originalTransactionDateIOS;
   final String? originalTransactionIdentifierIOS;
@@ -238,6 +241,7 @@ class PurchasedItem {
         autoRenewingAndroid = json['autoRenewingAndroid'] as bool?,
         purchaseStateAndroid =
             _decodePurchaseStateAndroid(json['purchaseStateAndroid'] as int?),
+        userIdAmazon = json['userIdAmazon'] as String?,
         originalTransactionDateIOS =
             _extractDate(json['originalTransactionDateIOS']),
         originalTransactionIdentifierIOS =
@@ -260,6 +264,9 @@ class PurchasedItem {
         'isAcknowledgedAndroid: $isAcknowledgedAndroid, '
         'autoRenewingAndroid: $autoRenewingAndroid, '
         'purchaseStateAndroid: $purchaseStateAndroid, '
+
+        /// amazon specific
+        'userIdAmazon: $userIdAmazon, '
 
         /// ios specific
         'originalTransactionDateIOS: ${originalTransactionDateIOS?.toIso8601String()}, '

@@ -201,7 +201,8 @@ class AmazonInappPurchasePlugin : MethodCallHandler {
                             receipt.sku,
                             receipt.receiptId,
                             receipt.receiptId,
-                            transactionDate.toDouble()
+                            transactionDate.toDouble(),
+                            response.userData.userId
                         )
                         Log.d(TAG, "opr Putting $item")
                         safeResult!!.success(item.toString())
@@ -234,7 +235,8 @@ class AmazonInappPurchasePlugin : MethodCallHandler {
                                 receipt.sku,
                                 receipt.receiptId,
                                 receipt.receiptId,
-                                transactionDate.toDouble()
+                                transactionDate.toDouble(),
+                                response.userData.userId
                             )
                             Log.d(TAG, "opudr Putting $item")
                             items.put(item)
@@ -260,7 +262,8 @@ class AmazonInappPurchasePlugin : MethodCallHandler {
     @Throws(JSONException::class)
     fun getPurchaseData(
         productId: String?, transactionId: String?, transactionReceipt: String?,
-        transactionDate: Double?
+        transactionDate: Double?,
+        userId: String
     ): JSONObject {
         val item = JSONObject()
         item.put("productId", productId)
@@ -270,6 +273,7 @@ class AmazonInappPurchasePlugin : MethodCallHandler {
         item.put("dataAndroid", null)
         item.put("signatureAndroid", null)
         item.put("purchaseToken", null)
+        item.put("userIdAmazon", userId)
         return item
     }
 }
