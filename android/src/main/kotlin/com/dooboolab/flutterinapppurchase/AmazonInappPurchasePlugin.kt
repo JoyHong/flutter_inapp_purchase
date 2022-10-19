@@ -211,12 +211,11 @@ class AmazonInappPurchasePlugin : MethodCallHandler {
                         safeResult!!.error(TAG, "E_BILLING_RESPONSE_JSON_PARSE_ERROR", e.message)
                     }
                 }
-                PurchaseResponse.RequestStatus.FAILED -> safeResult!!.error(
-                    TAG,
-                    "buyItemByType",
-                    "billingResponse is not ok: $status"
-                )
-                else -> {}
+                else -> {
+                    val json = JSONObject()
+                    json.put("message", "billingResponse is not ok: $status")
+                    safeResult!!.invokeMethod("purchase-error", json.toString())
+                }
             }
         }
 
