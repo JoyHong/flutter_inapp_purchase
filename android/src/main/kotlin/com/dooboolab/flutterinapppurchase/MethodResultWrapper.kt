@@ -12,19 +12,43 @@ class MethodResultWrapper internal constructor(
 ) : MethodChannel.Result {
     private val handler: Handler = Handler(Looper.getMainLooper())
     override fun success(result: Any?) {
-        handler.post { safeResult.success(result) }
+        handler.post {
+            try {
+                safeResult.success(result)
+            } catch (ignored: IllegalStateException) {
+                // Reply already submitted
+            }
+        }
     }
 
     override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
-        handler.post { safeResult.error(errorCode, errorMessage, errorDetails) }
+        handler.post {
+            try {
+                safeResult.error(errorCode, errorMessage, errorDetails)
+            } catch (ignored: IllegalStateException) {
+                // Reply already submitted
+            }
+        }
     }
 
     override fun notImplemented() {
-        handler.post { safeResult.notImplemented() }
+        handler.post {
+            try {
+                safeResult.notImplemented()
+            } catch (ignored: IllegalStateException) {
+                // Reply already submitted
+            }
+        }
     }
 
     fun invokeMethod(method: String?, arguments: Any?) {
-        handler.post { safeChannel.invokeMethod(method!!, arguments, null) }
+        handler.post {
+            try {
+                safeChannel.invokeMethod(method!!, arguments, null)
+            } catch (ignored: IllegalStateException) {
+                // Reply already submitted
+            }
+        }
     }
 
 }
