@@ -425,7 +425,11 @@ class AndroidInappPurchasePlugin internal constructor() : MethodCallHandler,
 
                     // One-time offer details have changed in 5.0
                     if (productDetails.oneTimePurchaseOfferDetails != null) {
-                        item.put("introductoryPrice", productDetails.oneTimePurchaseOfferDetails!!.formattedPrice)
+                        val details = productDetails.oneTimePurchaseOfferDetails!!
+                        item.put("introductoryPrice", details.formattedPrice)
+                        item.put("price", (details.priceAmountMicros / 1000000f).toString())
+                        item.put("currency", details.priceCurrencyCode)
+                        item.put("localizedPrice", details.formattedPrice)
                     }
 
                     // These generalized values are derived from the first pricing object, mainly for backwards compatibility
