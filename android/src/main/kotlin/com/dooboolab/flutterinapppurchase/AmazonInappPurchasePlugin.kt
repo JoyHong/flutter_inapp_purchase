@@ -70,7 +70,7 @@ class AmazonInappPurchasePlugin : MethodCallHandler {
             "getProducts",
             "getSubscriptions" -> {
                 Log.d(TAG, call.method)
-                val skus = call.argument<ArrayList<String>>("skus")!!
+                val skus = call.argument<ArrayList<String>>("productIds")!!
                 val productSkus: MutableSet<String> = HashSet()
                 for (i in skus.indices) {
                     Log.d(TAG, "Adding " + skus[i])
@@ -99,7 +99,7 @@ class AmazonInappPurchasePlugin : MethodCallHandler {
                 val type = call.argument<String>("type")
                 //val obfuscatedAccountId = call.argument<String>("obfuscatedAccountId")
                 //val obfuscatedProfileId = call.argument<String>("obfuscatedProfileId")
-                val sku = call.argument<String>("sku")
+                val sku = call.argument<String>("productId")
                 val oldSku = call.argument<String>("oldSku")
                 //val prorationMode = call.argument<Int>("prorationMode")!!
                 Log.d(TAG, "type=$type||sku=$sku||oldsku=$oldSku")
