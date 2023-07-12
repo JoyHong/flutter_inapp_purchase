@@ -265,9 +265,8 @@ class AndroidInappPurchasePlugin internal constructor() : MethodCallHandler,
                     item.put("purchaseToken", purchase.purchaseToken)
                     item.put("signatureAndroid", purchase.signature)
                     item.put("purchaseStateAndroid", purchase.purchaseState)
-                    if (type == BillingClient.ProductType.INAPP) {
-                        item.put("isAcknowledgedAndroid", purchase.isAcknowledged)
-                    } else if (type == BillingClient.ProductType.SUBS) {
+                    item.put("isAcknowledgedAndroid", purchase.isAcknowledged)
+                    if (type == BillingClient.ProductType.SUBS) {
                         item.put("autoRenewingAndroid", purchase.isAutoRenewing)
                     }
                     items.put(item)
