@@ -1,10 +1,32 @@
+## 5.4.2
+## What's Changed
+* Update actions/stale action to v8 by @renovate in https://github.com/dooboolab-community/flutter_inapp_purchase/pull/414
+* Fix - wrong casting by @BrunoFSimon in https://github.com/dooboolab-community/flutter_inapp_purchase/pull/427
+* Fixed consumable product purchase on Android by @33-Elephants in https://github.com/dooboolab-community/flutter_inapp_purchase/pull/420
+
+## New Contributors
+* @BrunoFSimon made their first contribution in https://github.com/dooboolab-community/flutter_inapp_purchase/pull/427
+* @33-Elephants made their first contribution in https://github.com/dooboolab-community/flutter_inapp_purchase/pull/420
+
+**Full Changelog**: https://github.com/dooboolab-community/flutter_inapp_purchase/compare/5.4.1...5.4.2
+
+## 5.4.1
+- Fixed concurrency issue on iOS. by @OctavianLfrd in https://github.com/dooboolab/flutter_inapp_purchase/pull/413
+
+## 5.4.0
+
+- Fixed wrong casting in checkSubscribed method by @kleeb in https://github.com/dooboolab/flutter_inapp_purchase/pull/368
+- Upgrade to billing 5.1 (reverse compatible) by @SamBergeron in https://github.com/dooboolab/flutter_inapp_purchase/pull/392
+
 ## 5.3.0
 
 ## What's Changed
-* Refactor java to kotlin, add showInAppMessageAndroid by @offline-first in https://github.com/dooboolab/flutter_inapp_purchase/pull/365
+
+- Refactor java to kotlin, add showInAppMessageAndroid by @offline-first in https://github.com/dooboolab/flutter_inapp_purchase/pull/365
 
 ## New Contributors
-* @offline-first made their first contribution in https://github.com/dooboolab/flutter_inapp_purchase/pull/365
+
+- @offline-first made their first contribution in https://github.com/dooboolab/flutter_inapp_purchase/pull/365
 
 **Full Changelog**: https://github.com/dooboolab/flutter_inapp_purchase/compare/5.2.0...5.3.0
 
