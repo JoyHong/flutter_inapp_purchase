@@ -334,6 +334,17 @@ class FlutterInappPurchase {
   /// Indicates that the App Store purchase should continue from the app instead of the App Store.
   ///
   /// @returns {Future<String>}
+  Future<String?> requestReceiptIOS() async {
+    if (_platform.isIOS) {
+      return await _channel.invokeMethod('requestReceipt');
+    }
+    return null;
+  }
+  
+  /// Add Store Payment (iOS only)
+  /// Indicates that the App Store purchase should continue from the app instead of the App Store.
+  ///
+  /// @returns {Future<String>}
   Future<String?> getPromotedProductIOS() async {
     if (_platform.isIOS) {
       return await _channel.invokeMethod('getPromotedProduct');
