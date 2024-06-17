@@ -16,21 +16,21 @@ jobs:
           distribution: 'adopt'
           java-version: "14.x"
 
-      - uses: subosito/flutter-action@v1
+      - uses: subosito/flutter-action@v2
         with:
           channel: "stable"
           flutter-version: "3.x"
 
       - run: flutter pub get
 
-      - run: flutter format --set-exit-if-changed .
+      - run: dart format --set-exit-if-changed .
 
       # - run: flutter analyze .
 
       - run: flutter test --coverage
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: coverage/lcov.info
