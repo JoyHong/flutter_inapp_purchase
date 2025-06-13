@@ -419,6 +419,7 @@ class AndroidInappPurchasePlugin internal constructor() : MethodCallHandler,
             try {
                 val items = JSONArray()
                 for (productDetails in products) {
+                    Log.d("内购支付---getProductsByType", productDetails.toString());
                     // Add to list of tracked products
                     if (!productDetailsList.contains(productDetails)) {
                         productDetailsList.add(productDetails)
@@ -512,6 +513,7 @@ class AndroidInappPurchasePlugin internal constructor() : MethodCallHandler,
             val builder = newBuilder()
             var selectedProductDetails: ProductDetails? = null
             for (productDetails in productDetailsList) {
+                Log.d("内购支付排查---buyItemByType", productDetails.toString());
                 if (productDetails.productId == productId) {
                     selectedProductDetails = productDetails
                     break
