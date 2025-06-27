@@ -263,9 +263,11 @@ class AndroidInappPurchasePlugin internal constructor() : MethodCallHandler,
         val type = if(call.argument<String>("type") == "subs") BillingClient.ProductType.SUBS else BillingClient.ProductType.INAPP
         val params = QueryPurchasesParams.newBuilder().apply { setProductType(type) }.build()
         val items = JSONArray()
+        var currentProductDetails: Purchase? = null
         billingClient!!.queryPurchasesAsync(params) { billingResult, productDetailList ->
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                 for (purchase in productDetailList) {
+                    currentProductDetails = purchase
                     val item = JSONObject()
                     item.put("productId", purchase.products[0])
                     item.put("transactionId", purchase.orderId)
@@ -284,7 +286,7 @@ class AndroidInappPurchasePlugin internal constructor() : MethodCallHandler,
             } else {
                 safeChannel.error(
                     call.method, billingResult.debugMessage,
-                    "responseCode:${billingResult.responseCode}"
+                    "currentProductDetails:${currentProductDetails} responseCode:${billingResult.responseCode}"
                 )
             }
         }
@@ -409,6 +411,7 @@ class AndroidInappPurchasePlugin internal constructor() : MethodCallHandler,
         billingClient!!.queryProductDetailsAsync(
             QueryProductDetailsParams.newBuilder().setProductList(params).build()
         ) { billingResult, products ->
+            var currentProductDetails: ProductDetails? = null
             // On error
             if (billingResult.responseCode != BillingClient.BillingResponseCode.OK) {
                 val errorData = BillingError.getErrorFromResponseData(billingResult.responseCode)
@@ -419,6 +422,7 @@ class AndroidInappPurchasePlugin internal constructor() : MethodCallHandler,
             try {
                 val items = JSONArray()
                 for (productDetails in products) {
+                    currentProductDetails =  productDetails
                     // Add to list of tracked products
                     if (!productDetailsList.contains(productDetails)) {
                         productDetailsList.add(productDetails)
@@ -489,9 +493,9 @@ class AndroidInappPurchasePlugin internal constructor() : MethodCallHandler,
                 return@queryProductDetailsAsync
             } catch (je: JSONException) {
                 je.printStackTrace()
-                safeChannel.error(TAG, BillingError.E_BILLING_RESPONSE_JSON_PARSE_ERROR, je.message)
+                safeChannel.error(TAG, BillingError.E_BILLING_RESPONSE_JSON_PARSE_ERROR,"${currentProductDetails.toString()} ${je.message}")
             } catch (fe: FlutterException) {
-                safeChannel.error(call.method, fe.message, fe.localizedMessage)
+                safeChannel.error(call.method, fe.message,"${currentProductDetails.toString()} ${fe.localizedMessage}")
                 return@queryProductDetailsAsync
             }
         }
@@ -501,6 +505,7 @@ class AndroidInappPurchasePlugin internal constructor() : MethodCallHandler,
         call: MethodCall,
         safeChannel: MethodResultWrapper
     ) {
+        var currentProductDetails: ProductDetails? = null
         try {
             val type = if(call.argument<String>("type") == "subs") BillingClient.ProductType.SUBS else BillingClient.ProductType.INAPP
             val obfuscatedAccountId = call.argument<String>("obfuscatedAccountId")
@@ -512,6 +517,7 @@ class AndroidInappPurchasePlugin internal constructor() : MethodCallHandler,
             val builder = newBuilder()
             var selectedProductDetails: ProductDetails? = null
             for (productDetails in productDetailsList) {
+                currentProductDetails = productDetails
                 if (productDetails.productId == productId) {
                     selectedProductDetails = productDetails
                     break
@@ -520,7 +526,7 @@ class AndroidInappPurchasePlugin internal constructor() : MethodCallHandler,
             if (selectedProductDetails == null) {
                 val debugMessage =
                     "The selected product was not found. Please fetch setObfuscatedAccountIdproducts first by calling getItems"
-                safeChannel.error(TAG, "buyItemByType", debugMessage)
+                safeChannel.error(TAG, "buyItemByType", "productDetails:${currentProductDetails.toString()} debugMessage：${debugMessage}")
                 return
             }
 
@@ -583,7 +589,7 @@ class AndroidInappPurchasePlugin internal constructor() : MethodCallHandler,
 
             }
         } catch (e: Exception) {
-            safeChannel.error(TAG, "buyItemByType", e.message)
+            safeChannel.error(TAG, "buyItemByType","productDetails:${currentProductDetails.toString()} e.message:${e.message}")
             return
         }
     }
