@@ -263,11 +263,9 @@ class AndroidInappPurchasePlugin internal constructor() : MethodCallHandler,
         val type = if(call.argument<String>("type") == "subs") BillingClient.ProductType.SUBS else BillingClient.ProductType.INAPP
         val params = QueryPurchasesParams.newBuilder().apply { setProductType(type) }.build()
         val items = JSONArray()
-        var currentProductDetails: Purchase? = null
         billingClient!!.queryPurchasesAsync(params) { billingResult, productDetailList ->
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                 for (purchase in productDetailList) {
-                    currentProductDetails = purchase
                     val item = JSONObject()
                     item.put("productId", purchase.products[0])
                     item.put("transactionId", purchase.orderId)
@@ -286,7 +284,7 @@ class AndroidInappPurchasePlugin internal constructor() : MethodCallHandler,
             } else {
                 safeChannel.error(
                     call.method, billingResult.debugMessage,
-                    "currentProductDetails:${currentProductDetails} responseCode:${billingResult.responseCode}"
+                    "responseCode:${billingResult.responseCode}"
                 )
             }
         }
@@ -411,7 +409,6 @@ class AndroidInappPurchasePlugin internal constructor() : MethodCallHandler,
         billingClient!!.queryProductDetailsAsync(
             QueryProductDetailsParams.newBuilder().setProductList(params).build()
         ) { billingResult, products ->
-            var currentProductDetails: ProductDetails? = null
             // On error
             if (billingResult.responseCode != BillingClient.BillingResponseCode.OK) {
                 val errorData = BillingError.getErrorFromResponseData(billingResult.responseCode)
@@ -421,11 +418,12 @@ class AndroidInappPurchasePlugin internal constructor() : MethodCallHandler,
 
             try {
                 val items = JSONArray()
+                logBuilder.append("查询到的商品详情列表长度:${products.size}，getProductsByType 当前查询商品id列表:${productIds}\n")
                 for (productDetails in products) {
-                    currentProductDetails =  productDetails
                     // Add to list of tracked products
                     if (!productDetailsList.contains(productDetails)) {
                         productDetailsList.add(productDetails)
+                        logBuilder.append("getProductsByType 当前列表没有包含查询id:${productDetails.productId},查询成功后添加，productDetailsList 长度：${productDetailsList.size},\n")
                     }
 
                     // Create flutter objects
@@ -493,9 +491,9 @@ class AndroidInappPurchasePlugin internal constructor() : MethodCallHandler,
                 return@queryProductDetailsAsync
             } catch (je: JSONException) {
                 je.printStackTrace()
-                safeChannel.error(TAG, BillingError.E_BILLING_RESPONSE_JSON_PARSE_ERROR,"${currentProductDetails.toString()} ${je.message}")
+                safeChannel.error(TAG, BillingError.E_BILLING_RESPONSE_JSON_PARSE_ERROR,"getProductsByType details:${logBuilder} ${je.message}")
             } catch (fe: FlutterException) {
-                safeChannel.error(call.method, fe.message,"${currentProductDetails.toString()} ${fe.localizedMessage}")
+                safeChannel.error(call.method, fe.message,"getProductsByType details${logBuilder} ${fe.localizedMessage}")
                 return@queryProductDetailsAsync
             }
         }
@@ -505,7 +503,6 @@ class AndroidInappPurchasePlugin internal constructor() : MethodCallHandler,
         call: MethodCall,
         safeChannel: MethodResultWrapper
     ) {
-        var currentProductDetails: ProductDetails? = null
         try {
             val type = if(call.argument<String>("type") == "subs") BillingClient.ProductType.SUBS else BillingClient.ProductType.INAPP
             val obfuscatedAccountId = call.argument<String>("obfuscatedAccountId")
@@ -517,16 +514,19 @@ class AndroidInappPurchasePlugin internal constructor() : MethodCallHandler,
             val builder = newBuilder()
             var selectedProductDetails: ProductDetails? = null
             for (productDetails in productDetailsList) {
-                currentProductDetails = productDetails
                 if (productDetails.productId == productId) {
                     selectedProductDetails = productDetails
                     break
                 }
             }
+            logBuilder.append("buyItemByType 当前购买商品Type: $type，当前购买商品ID: $productId\n")
+                .append("buyItemByType 购买时商品详情列表长度: ${productDetailsList.size}\t all id:${productDetailsList.map { it.productId }.joinToString(", ")}\n")
+                .append("buyItemByType 匹配成功的商品ID: ${selectedProductDetails?.productId}\n")
+                .append("buyItemByType 匹配成功的商品Name: ${selectedProductDetails?.name}\n")
             if (selectedProductDetails == null) {
                 val debugMessage =
                     "The selected product was not found. Please fetch setObfuscatedAccountIdproducts first by calling getItems"
-                safeChannel.error(TAG, "buyItemByType", "productDetails:${currentProductDetails.toString()} debugMessage：${debugMessage}")
+                safeChannel.error(TAG, "buyItemByType", "buyItemByType details:${logBuilder} debugMessage：${debugMessage}")
                 return
             }
 
@@ -589,7 +589,7 @@ class AndroidInappPurchasePlugin internal constructor() : MethodCallHandler,
 
             }
         } catch (e: Exception) {
-            safeChannel.error(TAG, "buyItemByType","productDetails:${currentProductDetails.toString()} e.message:${e.message}")
+            safeChannel.error(TAG, "buyItemByType","buyItemByType details:${logBuilder} e.message:${e.message}")
             return
         }
     }
@@ -659,5 +659,6 @@ class AndroidInappPurchasePlugin internal constructor() : MethodCallHandler,
         private const val TAG = "InappPurchasePlugin"
         private const val PLAY_STORE_URL = "https://play.google.com/store/account/subscriptions"
         private var productDetailsList: ArrayList<ProductDetails> = arrayListOf()
+        val logBuilder = StringBuilder()
     }
 }
