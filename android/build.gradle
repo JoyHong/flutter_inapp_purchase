@@ -28,7 +28,7 @@ android {
     if (project.android.hasProperty('namespace')) {
         namespace 'com.dooboolab.flutterinapppurchase'
     }
-    compileSdkVersion 33
+    compileSdkVersion 34
 
     defaultConfig {
         minSdkVersion 21
@@ -51,7 +51,7 @@ android {
 }
 
 dependencies {
-    def billing_version = "6.0.1"
+    def billing_version = "7.0.0"
 
     implementation "com.android.billingclient:billing-ktx:$billing_version"
     implementation files('jars/in-app-purchasing-2.0.76.jar')
