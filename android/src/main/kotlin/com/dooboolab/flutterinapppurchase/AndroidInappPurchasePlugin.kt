@@ -564,10 +564,6 @@ class AndroidInappPurchasePlugin internal constructor() : MethodCallHandler,
                 params.setSubscriptionReplacementMode(replacementMode)
             }
 
-            if (replacementMode != null && replacementMode != -1) {
-                params.setSubscriptionReplacementMode(replacementMode)
-            }
-
             if (purchaseToken != null) {
                 params.setOldPurchaseToken(purchaseToken)
                 builder.setSubscriptionUpdateParams(params.build())
