@@ -508,7 +508,7 @@ class AndroidInappPurchasePlugin internal constructor() : MethodCallHandler,
             val obfuscatedAccountId = call.argument<String>("obfuscatedAccountId")
             val obfuscatedProfileId = call.argument<String>("obfuscatedProfileId")
             val productId = call.argument<String>("productId")
-            val prorationMode = call.argument<Int>("prorationMode")!!
+            val replacementMode = call.argument<Int>("replacementMode")
             val purchaseToken = call.argument<String>("purchaseToken")
             val offerTokenIndex = call.argument<Int>("offerTokenIndex")
             val builder = newBuilder()
@@ -533,17 +533,21 @@ class AndroidInappPurchasePlugin internal constructor() : MethodCallHandler,
             // Get the selected offerToken from the product, or first one if this is a migrated from 4.0 product
             // or if the offerTokenIndex was not provided
             val productDetailsParamsBuilder = ProductDetailsParams.newBuilder().setProductDetails(selectedProductDetails)
-            var offerToken : String? = null
 
             if (type == BillingClient.ProductType.SUBS) {
-                if (offerTokenIndex != null) {
-                    offerToken = selectedProductDetails.subscriptionOfferDetails?.get(offerTokenIndex)?.offerToken
+                val subscriptionOfferDetails = selectedProductDetails.subscriptionOfferDetails
+                if (!subscriptionOfferDetails.isNullOrEmpty()) {
+                    var offerToken: String? = null
+                    if (offerTokenIndex != null) {
+                        offerToken = subscriptionOfferDetails.get(offerTokenIndex)?.offerToken
+                    }
+                    if (offerToken == null) {
+                        offerToken = subscriptionOfferDetails[0].offerToken
+                    }
+                    if (!offerToken.isNullOrEmpty()) {
+                        productDetailsParamsBuilder.setOfferToken(offerToken)
+                    }
                 }
-                if (offerToken == null) {
-                    offerToken = selectedProductDetails.subscriptionOfferDetails!![0].offerToken
-                }
-
-                productDetailsParamsBuilder.setOfferToken(offerToken)
             }
 
             val productDetailsParamsList = listOf(productDetailsParamsBuilder.build())
@@ -559,25 +563,8 @@ class AndroidInappPurchasePlugin internal constructor() : MethodCallHandler,
                 builder.setObfuscatedProfileId(obfuscatedProfileId)
             }
 
-            when (prorationMode) {
-                -1 -> {} //ignore
-                ProrationMode.IMMEDIATE_AND_CHARGE_PRORATED_PRICE -> {
-                    params.setReplaceProrationMode(ProrationMode.IMMEDIATE_AND_CHARGE_PRORATED_PRICE)
-                    if (type != BillingClient.ProductType.SUBS) {
-                        safeChannel.error(
-                            TAG,
-                            "buyItemByType",
-                            "IMMEDIATE_AND_CHARGE_PRORATED_PRICE for proration mode only works in subscription purchase."
-                        )
-                        return
-                    }
-                }
-                ProrationMode.IMMEDIATE_WITHOUT_PRORATION,
-                ProrationMode.DEFERRED,
-                ProrationMode.IMMEDIATE_WITH_TIME_PRORATION,
-                ProrationMode.IMMEDIATE_AND_CHARGE_FULL_PRICE ->
-                    params.setReplaceProrationMode(prorationMode)
-                else -> params.setReplaceProrationMode(ProrationMode.UNKNOWN_SUBSCRIPTION_UPGRADE_DOWNGRADE_POLICY)
+            if (replacementMode != null && replacementMode != -1) {
+                params.setSubscriptionReplacementMode(replacementMode)
             }
 
             if (purchaseToken != null) {
